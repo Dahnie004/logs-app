@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Logs – Grocery Stock Manager</title>
+<style>
+:root{--bg:#eef2f6;--surf:#fff;--ink:#14202e;--mute:#64748b;--line:#d9e1ea;--nav:#10283f;--navt:#a9bcd0;--acc:#f2a900;--g:#14804a;--gt:#dcf3e6;--a:#a35f00;--at:#fdecc8;--r:#b42318;--rt:#fde2df;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b141f;--surf:#142232;--ink:#e6edf5;--mute:#8da0b5;--line:#25374a;--nav:#08111b;--g:#4cd08c;--gt:#143a29;--a:#f5b94d;--at:#3b2c0f;--r:#ff8f84;--rt:#421c18}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Trebuchet MS","Segoe UI",system-ui,sans-serif}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+nav{background:var(--nav);color:var(--navt);padding:20px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
+.logo{display:flex;align-items:center;gap:10px;background:none;border:0;color:#fff;padding:4px 6px 18px;cursor:pointer;text-align:left}
+.badge{width:44px;height:44px;border-radius:14px 14px 14px 4px;background:var(--acc);color:#10283f;display:grid;place-items:center;font:800 1.6rem Georgia,serif}
+.logo b{font:700 1.5rem Georgia,serif;letter-spacing:.5px}
+.logo small{display:block;color:var(--navt);font-size:.75rem;font-weight:400}
+nav a{color:var(--navt);text-decoration:none;padding:10px 12px;border-radius:10px;display:block}
+nav a.on{background:rgba(242,169,0,.16);color:#fff;box-shadow:inset 3px 0 0 var(--acc)}
+main{padding:24px 22px 60px;max-width:1000px;width:100%}
+h1{font:700 1.8rem Georgia,serif;margin:0 0 4px}.sub{color:var(--mute);margin:0 0 18px}
+h2{font:700 1.15rem Georgia,serif;margin:22px 0 8px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px 14px;border-top:4px solid var(--line)}
+.stat b{display:block;font:700 1.45rem Georgia,serif}.stat span{color:var(--mute);font-size:.88rem}
+.stat.w{border-top-color:var(--acc)}.stat.d{border-top-color:var(--r)}.stat.k{border-top-color:var(--g)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+input,select,button,textarea{font:inherit;color:var(--ink)}
+input,select{background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.bar input{flex:1 1 180px}
+button{cursor:pointer;border:1px solid var(--line);background:var(--surf);border-radius:8px;padding:8px 13px}
+button.pri{background:var(--nav);border-color:var(--nav);color:#fff;font-weight:700}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) button.pri{background:var(--acc);border-color:var(--acc);color:#10283f}}
+:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+.tw{overflow-x:auto;background:var(--surf);border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:.85rem;color:var(--mute);font-weight:600}tr:last-child td{border:0}
+td small{display:block;color:var(--mute)}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.82rem;font-weight:700}
+.ok{background:var(--gt);color:var(--g)}.low{background:var(--at);color:var(--a)}.out,.exp{background:var(--rt);color:var(--r)}
+.in{color:var(--g);font-weight:700}.outq{color:var(--r);font-weight:700}
+.sm{padding:4px 10px;font-size:.88rem}.x{border:0;background:none;color:var(--mute)}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--surf);color:var(--ink);width:min(500px,94vw);padding:20px}
+dialog::backdrop{background:rgba(5,12,20,.55)}
+dialog h2{margin:0 0 12px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g label{display:flex;flex-direction:column;gap:3px;font-size:.86rem;color:var(--mute)}.g .f{grid-column:1/-1}
+.acts{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.empty{padding:26px;text-align:center;color:var(--mute)}
+.cnt{width:90px}
+@media (max-width:760px){.app{display:block}
+nav{position:fixed;bottom:0;left:0;right:0;top:auto;height:auto;flex-direction:row;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:5;justify-content:space-around}
+nav a{padding:8px 10px;font-size:.85rem}nav a.on{box-shadow:none}.logo{display:none}
+main{padding:16px 14px 90px}.mlogo{display:flex!important}}
+.mlogo{display:none;align-items:center;gap:8px;margin-bottom:12px;background:none;border:0;padding:0}
+.mlogo .badge{width:36px;height:36px;font-size:1.3rem}.mlogo b{font:700 1.25rem Georgia,serif}
+.bars{display:flex;align-items:flex-end;gap:3px;height:150px;background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px}
+.bars i{flex:1;background:var(--acc);border-radius:4px 4px 0 0;min-height:2px}
+.cap{display:flex;justify-content:space-between;color:var(--mute);font-size:.82rem;margin-top:4px}
+.nodl .dl{display:none}.row{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px;align-items:center}
+a.btn{text-decoration:none;border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:8px;padding:8px 13px;display:inline-block}
+@media (max-width:760px){nav{overflow-x:auto;justify-content:flex-start}nav a{white-space:nowrap}}
+#login{min-height:100vh;display:grid;place-items:center;padding:16px}.lc{background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:26px;width:min(400px,100%)}
+body.out .app{display:none}body:not(.out) #login{display:none}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:90px;background:var(--nav);color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:30;max-width:90vw}
+.so{margin-top:auto;background:none;border:1px solid var(--navt);color:var(--navt)}
+@media (max-width:760px){.so{margin:0;white-space:nowrap}}
+</style></head><body class="out">
+<div id="login"><div class="lc"><div class="badge" style="margin:0 auto 10px">L</div><h1 style="text-align:center">Logs</h1><p class="sub" style="text-align:center">Sign in to your store</p>
+<div class="g"><label class="f">Email<input id="le" type="email" autocomplete="username"></label><label class="f">Password<input id="lp" type="password" autocomplete="current-password"></label></div>
+<p id="lerr" style="color:var(--r);min-height:1.4em"></p><button class="pri" id="lgo" style="width:100%">Sign in</button></div></div>
+<div id="toast" role="status"></div>
+<div class="app">
+<nav id="nav" aria-label="Main">
+ <button class="logo" id="logo" title="Change name"></button>
+ <a href="#dashboard">Dashboard</a><a href="#products">Products</a><a href="#history">Stock history</a><a href="#count">Stock count</a><a href="#restock">Restock</a><a href="#expiry">Expiry</a><a href="#profit">Profit</a><a href="#reports">Reports</a><a href="#staff">Staff</a><button class="so" data-act="out">Sign out</button>
+</nav>
+<main><button class="mlogo" id="mlogo"></button><div id="page"></div></main>
+</div>
+
+<dialog id="dName"><h2>Welcome. What’s your name?</h2>
+ <p style="color:var(--mute);margin:0 0 10px">Your logo uses the first letter, like Xlogs or Dlogs.</p>
+ <input id="nm" style="width:100%" placeholder="e.g. Daniel"><div class="acts"><button class="pri" id="nmOk">Continue</button></div></dialog>
+
+<dialog id="dProd"><h2 id="pT">Add product</h2><div class="g">
+ <label class="f">Product name<input id="p-name"></label>
+ <label>Category<select id="p-cat"></select></label>
+ <label>Supplier<input id="p-sup" placeholder="e.g. Dangote Distributors"></label>
+ <label>Single unit<input id="p-unit" placeholder="piece, kg, tin"></label>
+ <label>Pack name<input id="p-pn" placeholder="carton, bag"></label>
+ <label>Units per pack<input id="p-ps" type="number" min="1" value="1"></label>
+ <label id="p-qw">Opening stock (single units)<input id="p-qty" type="number" min="0" value="0"></label>
+ <label>Reorder below (single units)<input id="p-min" type="number" min="0" value="5"></label>
+ <label>Cost per unit (₦)<input id="p-cost" type="number" min="0" value="0"></label>
+ <label>Selling price per unit (₦)<input id="p-price" type="number" min="0" value="0"></label>
+ <label class="f">Expiry date (optional)<input id="p-exp" type="date"></label></div>
+ <div class="acts"><button data-act="close">Cancel</button><button class="pri" id="pSave">Save product</button></div></dialog>
+
+<dialog id="dAdj"><h2 id="aT">Update stock</h2><div class="g">
+ <label class="f">What happened?<select id="a-r"></select></label>
+ <label>Amount<input id="a-n" type="number" min="1" value="1"></label>
+ <label>In<select id="a-u"></select></label>
+ <label class="f">Note (optional)<input id="a-note"></label></div>
+ <div class="acts"><button data-act="close">Cancel</button><button class="pri" id="aSave">Save</button></div></dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const CATS=["Grains & staples","Drinks","Tinned & packaged","Dairy & eggs","Fresh produce","Frozen","Toiletries","Other"];
+const REASONS={"Sold":-1,"Damaged":-1,"Expired":-1,"New delivery":1,"Returned to shelf":1};
+const $=id=>document.getElementById(id),D=86400000;
+const today=()=>new Date(new Date().toDateString()).getTime();
+const iso=n=>new Date(today()+n*D).toISOString().slice(0,10);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const money=n=>"₦"+Math.round(n).toLocaleString("en-NG");
+const P=(id,name,cat,sup,unit,pn,ps,qty,min,cost,price,exp)=>({id,name,cat,sup,unit,pn,ps,qty,min,cost,price,exp});
+let S={user:"",role:"",uid:"",items:[],hist:[],staff:[]};const save=()=>{};
+const days=i=>i.exp?Math.round((new Date(i.exp).getTime()-today())/D):null;
+function status(i){const d=days(i);
+ if(d!==null&&d<0)return["exp","Expired"];if(i.qty<=0)return["out","Out of stock"];
+ if(d!==null&&d<=14)return["exp","Expires in "+d+"d"];if(i.qty<=i.min)return["low","Low stock"];return["ok","Good"]}
+function fq(i,q=i.qty){if(i.ps>1){const p=Math.floor(q/i.ps),r=q%i.ps;return (p?p+" "+(i.pn||"pack")+(p>1?"s":""):"")+(p&&r?" + ":"")+(r||!p?r+" "+i.unit:"")}return q+" "+(i.unit||"")}
+const fd=t=>new Date(t).toLocaleString("en-NG",{day:"numeric",month:"short",hour:"numeric",minute:"2-digit"});
+function brand(){const L=((S.user.trim()[0])||"S").toUpperCase();
+ const h=`<span class="badge">${esc(L)}</span><span><b>${esc(L)}logs</b><small>${esc(S.user)} · ${esc(S.role)}</small></span>`;
+ $("logo").innerHTML=h;$("mlogo").innerHTML=`<span class="badge">${esc(L)}</span><b>${esc(L)}logs</b>`;document.title=L+"logs – Grocery Stock Manager"}
+function log(i,delta,reason,note){S.hist.unshift({t:Date.now(),id:i.id,name:i.name,delta,after:i.qty,unit:i.unit,reason,note:note||"",by:S.user||"Owner",p:i.price,c:i.cost})}
+const findI=id=>S.items.find(x=>x.id==id);
+let F={q:"",c:"",f:"all",p:7};
+const rowsP=()=>S.items.filter(i=>i.name.toLowerCase().includes(F.q.toLowerCase())&&(!F.c||i.cat===F.c)&&(F.f==="all"||(F.f==="low"&&i.qty<=i.min)||(F.f==="exp"&&days(i)!==null&&days(i)<=14)));
+const PAGES={
+dashboard(){const low=S.items.filter(i=>i.qty<=i.min),ex=S.items.filter(i=>days(i)!==null&&days(i)<=14);
+ const val=S.items.reduce((s,i)=>s+i.qty*i.cost,0),at=[...new Set([...low,...ex])];
+ return `<h1>Dashboard</h1><p class="sub">Today at a glance${S.user?", "+esc(S.user):""}.</p>
+ <div class="stats"><div class="stat k"><b>${S.items.length}</b><span>Products</span></div><div class="stat w"><b>${low.length}</b><span>Low or out of stock</span></div><div class="stat d"><b>${ex.length}</b><span>Expiring or expired</span></div><div class="stat"><b>${money(val)}</b><span>Stock value at cost</span></div></div>
+ <h2>Needs attention</h2><div class="tw"><table><tbody>${at.map(i=>{const[s,l]=status(i);return `<tr><td><b>${esc(i.name)}</b><small>${esc(i.sup||"No supplier")}</small></td><td>${fq(i)}</td><td><span class="tag ${s}">${l}</span></td></tr>`}).join("")||`<tr><td class="empty">Nothing needs attention right now.</td></tr>`}</tbody></table></div>
+ <h2>Recent activity</h2>${histTable(S.hist.slice(0,5))}`},
+products(){return `<h1>Products</h1><p class="sub">Add, edit and update your stock.</p>
+ <div class="bar"><input id="q" type="search" placeholder="Search products" value="${esc(F.q)}" aria-label="Search"><select id="c" aria-label="Category"><option value="">All categories</option>${CATS.map(c=>`<option ${F.c===c?"selected":""}>${esc(c)}</option>`).join("")}</select>
+ <select id="f" aria-label="Status"><option value="all">All items</option><option value="low" ${F.f==="low"?"selected":""}>Low or out of stock</option><option value="exp" ${F.f==="exp"?"selected":""}>Expiring in 14 days</option></select>${can("edit")?`<button class="pri" data-act="add">Add product</button>`:""}</div>
+ <div class="tw"><table><thead><tr><th>Product</th><th>In stock</th><th>Expiry</th><th>Price</th><th>Status</th><th></th></tr></thead><tbody id="rows">${prodRows()}</tbody></table></div>`},
+history(){return `<h1>Stock history</h1><p class="sub">Every change, with when and who. Newest first.</p>${histTable(S.hist)}`},
+count(){return `<h1>Stock count</h1><p class="sub">Count what is on the shelf and enter it. Differences are saved to history.</p>
+ <div class="tw"><table><thead><tr><th>Product</th><th>System says</th><th>Counted (${"single units"})</th><th>Difference</th></tr></thead><tbody>${S.items.map(i=>`<tr><td><b>${esc(i.name)}</b></td><td>${i.qty} ${esc(i.unit)}</td><td><input class="cnt" type="number" min="0" data-cid="${i.id}" aria-label="Counted ${esc(i.name)}"></td><td id="d${i.id}">–</td></tr>`).join("")}</tbody></table></div>
+ <div class="acts"><button class="pri" data-act="applycount">Save count</button></div>`}};
+const pr=e=>e.p??(findI(e.id)||{}).price??0,co=e=>e.c??(findI(e.id)||{}).cost??0;
+const grp=a=>{const m={};a.forEach(e=>{const x=(m[e.name]=m[e.name]||{u:0,r:0,p:0,c:0}),u=-e.delta;x.u+=u;x.r+=u*pr(e);x.p+=u*(pr(e)-co(e));x.c+=u*co(e)});return Object.entries(m).map(([n,v])=>({n,...v})).sort((a,b)=>b.u-a.u)};
+const need=i=>{let t=Math.max(i.min*2-i.qty,i.min||1);if(i.ps>1)t=Math.ceil(t/i.ps)*i.ps;return t};
+const sold=n=>S.hist.filter(e=>e.reason==="Sold"&&e.t>=today()-(n-1)*D);
+const restockList=()=>{const m={};S.items.filter(i=>i.qty<=i.min).forEach(i=>{(m[i.sup||"No supplier"]=m[i.sup||"No supplier"]||[]).push(i)});return m};
+const tb=(h,r)=>`<div class="tw"><table><thead><tr>${h.map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${r||`<tr><td class="empty" colspan="${h.length}">Nothing to show yet.</td></tr>`}</tbody></table></div>`;
+Object.assign(PAGES,{
+restock(){const m=restockList(),sup=Object.keys(m);let tot=0;
+ const txt="Restock order%0A"+sup.map(k=>"%0A"+encodeURIComponent(k)+"%0A"+m[k].map(i=>"- "+encodeURIComponent(i.name+": "+fq(i,need(i)))).join("%0A")).join("%0A");
+ const body=sup.map(k=>{const sub=m[k].reduce((a,i)=>a+need(i)*i.cost,0);tot+=sub;return `<h2>${esc(k)}</h2>`+tb(["Product","In stock","Suggested order","Est. cost"],m[k].map(i=>`<tr><td><b>${esc(i.name)}</b></td><td>${fq(i)}</td><td><b>${fq(i,need(i))}</b></td><td>${money(need(i)*i.cost)}</td></tr>`).join("")+`<tr><td colspan="3"><b>Subtotal</b></td><td><b>${money(sub)}</b></td></tr>`)}).join("");
+ return `<h1>Restock list</h1><p class="sub">Everything at or below its reorder level, grouped by supplier. Suggested order refills to twice the reorder level.</p>
+ <div class="row"><b>Estimated total: ${money(tot)}</b>${sup.length?`<a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${txt}">Send on WhatsApp</a><button class="dl" data-act="csv" data-k="restock">Download for Excel</button>`:""}</div>${body||`<div class="tw"><div class="empty">Nothing to reorder. All stock is above its reorder level.</div></div>`}`},
+expiry(){const bands=[["Expired",i=>days(i)<0],["Within 7 days",i=>days(i)>=0&&days(i)<=7],["8 to 14 days",i=>days(i)>=8&&days(i)<=14],["15 to 30 days",i=>days(i)>=15&&days(i)<=30]];
+ const ex=S.items.filter(i=>days(i)!==null);
+ return `<h1>Expiry report</h1><p class="sub">Act early: discount fast-moving items, and ask suppliers about returns.</p>`+bands.map(([t,f])=>{const r=ex.filter(f);const v=r.reduce((a,i)=>a+i.qty*i.cost,0);
+ return `<h2>${t} <small style="color:var(--mute);font-weight:400">${r.length} item${r.length==1?"":"s"}, ${money(v)} at risk</small></h2>`+tb(["Product","In stock","Expiry","Value at cost","Suggestion"],r.map(i=>`<tr><td><b>${esc(i.name)}</b><small>${esc(i.sup||"")}</small></td><td>${fq(i)}</td><td>${i.exp}</td><td>${money(i.qty*i.cost)}</td><td>${days(i)<0?"Remove from shelf and record as Expired":days(i)<=7?"Sell at a discount now":"Move to the front of the shelf"}</td></tr>`).join(""))}).join("")},
+profit(){const g30=Object.fromEntries(grp(sold(30)).map(x=>[x.n,x]));
+ const rows=S.items.map(i=>({i,m:i.price>0?(i.price-i.cost)/i.price:0,s:(g30[i.name]||{u:0}).u})).sort((a,b)=>a.m-b.m);
+ const best=[...rows].sort((a,b)=>b.s-a.s).filter(x=>x.s>0).slice(0,3),slow=rows.filter(x=>x.s===0&&x.i.qty>0);
+ return `<h1>Profit</h1><p class="sub">Margin on each product. Sorted with the thinnest margins first.</p>
+ <div class="row"><button class="dl" data-act="csv" data-k="profit">Download for Excel</button></div>`+tb(["Product","Cost","Price","Profit per unit","Margin","Profit if all sold","Sold (30 days)"],rows.map(({i,m,s})=>`<tr><td><b>${esc(i.name)}</b></td><td>${money(i.cost)}</td><td>${money(i.price)}</td><td>${money(i.price-i.cost)}</td><td><span class="tag ${m<.1?"out":m<.2?"low":"ok"}">${Math.round(m*100)}%</span></td><td>${money(i.qty*(i.price-i.cost))}</td><td>${s}</td></tr>`).join(""))+
+ `<h2>Best sellers (30 days)</h2>`+tb(["Product","Units sold"],best.map(x=>`<tr><td>${esc(x.i.name)}</td><td>${x.s}</td></tr>`).join(""))+
+ `<h2>Slow movers: in stock, none sold in 30 days</h2>`+tb(["Product","In stock","Stock value"],slow.map(x=>`<tr><td>${esc(x.i.name)}</td><td>${fq(x.i)}</td><td>${money(x.i.qty*x.i.cost)}</td></tr>`).join(""))},
+reports(){const n=F.p,from=today()-(n-1)*D,sd=sold(n),w=S.hist.filter(e=>(e.reason==="Damaged"||e.reason==="Expired")&&e.t>=from);
+ const rev=sd.reduce((a,e)=>a-e.delta*pr(e),0),prof=sd.reduce((a,e)=>a-e.delta*(pr(e)-co(e)),0),wc=w.reduce((a,e)=>a-e.delta*co(e),0);
+ const by=Array.from({length:n},(_,k)=>sd.filter(e=>e.t>=from+k*D&&e.t<from+(k+1)*D).reduce((a,e)=>a-e.delta*pr(e),0)),mx=Math.max(...by,1);
+ const lab=t=>new Date(t).toLocaleDateString("en-NG",{day:"numeric",month:"short"});
+ return `<h1>Reports</h1><p class="sub">Sales and wastage from your stock history.</p>
+ <div class="row"><select id="per" aria-label="Period"><option value="1" ${n==1?"selected":""}>Today</option><option value="7" ${n==7?"selected":""}>Last 7 days</option><option value="30" ${n==30?"selected":""}>Last 30 days</option></select>
+ <button class="dl" data-act="csv" data-k="sales">Download for Excel</button></div>
+ <div class="stats"><div class="stat k"><b>${money(rev)}</b><span>Sales</span></div><div class="stat k"><b>${money(prof)}</b><span>Profit</span></div><div class="stat"><b>${sd.reduce((a,e)=>a-e.delta,0)}</b><span>Units sold</span></div><div class="stat d"><b>${money(wc)}</b><span>Lost to damage and expiry</span></div></div>
+ <h2>Sales per day</h2><div class="bars" role="img" aria-label="Sales per day">${by.map((v,k)=>`<i style="height:${v/mx*100}%" title="${lab(from+k*D)}: ${money(v)}"></i>`).join("")}</div><div class="cap"><span>${lab(from)}</span><span>${lab(today())}</span></div>
+ <h2>Top products by sales</h2>`+tb(["Product","Units","Sales","Profit"],grp(sd).slice(0,8).map(x=>`<tr><td>${esc(x.n)}</td><td>${x.u}</td><td>${money(x.r)}</td><td>${money(x.p)}</td></tr>`).join(""))+
+ `<h2>Wastage</h2>`+tb(["Product","Units lost","Cost"],grp(w).map(x=>`<tr><td>${esc(x.n)}</td><td>${x.u}</td><td>${money(x.c)}</td></tr>`).join(""))}});
+let DL=null;
+
+const csv=r=>r.map(x=>x.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(",")).join("\n");
+function exportCsv(k){let r;
+ if(k==="restock"){r=[["Supplier","Product","In stock (single units)","Order quantity (single units)","Estimated cost"]];const m=restockList();Object.keys(m).forEach(s=>m[s].forEach(i=>r.push([s,i.name,i.qty,need(i),need(i)*i.cost])))}
+ else if(k==="profit")r=[["Product","Cost","Price","Profit per unit","Stock"]].concat(S.items.map(i=>[i.name,i.cost,i.price,i.price-i.cost,i.qty]));
+ else r=[["Date","Product","Units sold","Sales","Profit"]].concat(sold(F.p).map(e=>[new Date(e.t).toISOString().slice(0,10),e.name,-e.delta,-e.delta*pr(e),-e.delta*(pr(e)-co(e))]));
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv(r)],{type:"text/csv"}));a.download=k+".csv";document.body.appendChild(a);a.click();a.remove()}
+function demo(){const now=Date.now();S.items.forEach(i=>{for(let d=0;d<14;d++){if(Math.random()>.45){const u=1+Math.floor(Math.random()*5);S.hist.push({t:now-d*D-Math.random()*D*.6,id:i.id,name:i.name,delta:-u,after:i.qty,unit:i.unit,reason:"Sold",note:"Sample",by:"Sample",p:i.price,c:i.cost})}}if(Math.random()>.5)S.hist.push({t:now-2*D,id:i.id,name:i.name,delta:-1,after:i.qty,unit:i.unit,reason:"Damaged",note:"Sample",by:"Sample",p:i.price,c:i.cost})});
+ S.hist.sort((a,b)=>b.t-a.t);save();route()}
+function prodRows(){const r=rowsP();return r.length?r.map(i=>{const[s,l]=status(i);return `<tr><td><b>${esc(i.name)}</b><small>${esc(i.cat)}${i.sup?" · "+esc(i.sup):""}</small></td><td>${fq(i)}${i.ps>1?`<small>1 ${esc(i.pn||"pack")} = ${i.ps} ${esc(i.unit)}</small>`:""}</td><td>${i.exp||"–"}</td><td>${money(i.price)}<small>per ${esc(i.unit||"unit")}</small></td><td><span class="tag ${s}">${l}</span></td>
+ <td style="white-space:nowrap"><button class="sm" data-act="adj" data-id="${i.id}">Update stock</button> ${can("edit")?`<button class="sm" data-act="edit" data-id="${i.id}">Edit</button>`:""} ${can("del")?`<button class="x" data-act="del" data-id="${i.id}">Delete</button>`:""}</td></tr>`}).join(""):`<tr><td colspan="6" class="empty">No products match.</td></tr>`}
+function histTable(h){return `<div class="tw"><table><thead><tr><th>When</th><th>Product</th><th>Change</th><th>Reason</th><th>By</th></tr></thead><tbody>${h.length?h.map(e=>`<tr><td>${fd(e.t)}</td><td>${esc(e.name)}</td><td class="${e.delta>=0?"in":"outq"}">${e.delta>0?"+":""}${e.delta} ${esc(e.unit)}<small>now ${e.after}</small></td><td>${esc(e.reason)}${e.note?`<small>${esc(e.note)}</small>`:""}</td><td>${esc(e.by)}</td></tr>`).join(""):`<tr><td colspan="5" class="empty">No activity yet. Update a product’s stock to start the log.</td></tr>`}</tbody></table></div>`}
+function route(){let p=location.hash.slice(1);if(!PAGES[p]||!allowed(p))p="dashboard";
+ document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+p));
+ $("page").innerHTML=PAGES[p]();window.scrollTo(0,0)}
+addEventListener("hashchange",route);
+let editId=null,adjId=null;
+const SB_URL="https://buwalsdknngbsvmqibey.supabase.co",SB_KEY="sb_publishable_4bey7T2tLrSVCIV4QOGn5Q_L7EBxYT9";
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const ROLEPAGES={manager:["dashboard","products","history","count","restock","expiry"],cashier:["dashboard","products","history"]};
+const allowed=p=>!ROLEPAGES[S.role]||ROLEPAGES[S.role].includes(p);
+const can=a=>({edit:["admin","manager"],del:["admin"]}[a]||[]).includes(S.role);
+function toast(m){const t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display="none",4000)}
+const applyNav=()=>document.querySelectorAll("nav a").forEach(a=>a.style.display=allowed(a.getAttribute("href").slice(1))?"":"none");
+async function loadAll(){
+ const[p,h,u]=await Promise.all([sb.from("products").select("*").order("name"),sb.from("stock_log").select("*").order("t",{ascending:false}).limit(2000),sb.from("profiles").select("*").order("created_at")]);
+ const er=p.error||h.error;if(er){toast("Could not load data: "+er.message);return}
+ S.items=p.data;S.staff=u.data||[];
+ S.hist=h.data.map(e=>({t:Date.parse(e.t),id:e.product_id,name:e.name,delta:e.delta,after:e.after_qty,unit:e.unit,reason:e.reason,note:e.note||"",by:e.by_name||"",p:e.price,c:e.cost}))}
+async function refresh(){await loadAll();route()}
+async function ok(q){const r=await q;if(r.error){toast(r.error.message);return false}return true}
+PAGES.staff=()=>`<h1>Staff</h1><p class="sub">Set roles, rename people, or switch an account off. To add someone, use Supabase: Authentication, Users, Add user. Maximum 11 accounts.</p>`+
+ tb(["Name","Role","Active"],S.staff.map(u=>{const me=u.id===S.uid;return `<tr><td><input data-nid="${u.id}" value="${esc(u.name)}" aria-label="Name">${me?"<small>You</small>":""}</td><td><select data-sid="${u.id}" ${me?"disabled":""}>${["admin","manager","cashier"].map(r=>`<option ${r===u.role?"selected":""}>${r}</option>`).join("")}</select></td><td><input type="checkbox" data-aid="${u.id}" ${u.active?"checked":""} ${me?"disabled":""} aria-label="Active"></td></tr>`}).join(""))+
+ `<h2>What each role can do</h2>`+tb(["Role","Can do"],[["admin","Everything: prices, deleting, staff, all reports"],["manager","Add and edit products (not prices), receive stock, stock counts, restock and expiry"],["cashier","Record sales only"]].map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td></tr>`).join(""));
+function openProd(id){editId=id;const i=id?findI(id):P(0,"",CATS[0],"","piece","",1,0,5,0,0,"");
+ $("pT").textContent=id?"Edit product":"Add product";$("p-cat").innerHTML=CATS.map(c=>`<option ${c===i.cat?"selected":""}>${esc(c)}</option>`).join("");
+ $("p-qw").style.display=id?"none":"flex";
+ ["name","sup","unit","pn","ps","qty","min","cost","price","exp"].forEach(k=>$("p-"+k).value=i[k]??"");
+ ["cost","price"].forEach(k=>$("p-"+k).disabled=S.role!=="admin");$("dProd").showModal()}
+$("pSave").onclick=async()=>{const n=$("p-name").value.trim();if(!n){$("p-name").focus();return}
+ const v=k=>+$("p-"+k).value||0,o={name:n,cat:$("p-cat").value,sup:$("p-sup").value.trim(),unit:$("p-unit").value.trim()||"piece",pn:$("p-pn").value.trim(),ps:Math.max(1,v("ps")),min:v("min"),exp:$("p-exp").value||null};
+ if(S.role==="admin"){o.cost=v("cost");o.price=v("price")}
+ if(editId){if(!await ok(sb.from("products").update(o).eq("id",editId)))return}
+ else{const r=await sb.from("products").insert(o).select().single();if(r.error){toast(r.error.message);return}
+  const q=v("qty");if(q>0)await ok(sb.rpc("adjust_stock",{p_id:r.data.id,p_delta:q,p_reason:"New delivery",p_note:"Opening stock"}))}
+ $("dProd").close();refresh()};
+function openAdj(id){adjId=id;const i=findI(id);$("aT").textContent="Update stock: "+i.name;
+ const rs=S.role==="cashier"?["Sold"]:Object.keys(REASONS);
+ $("a-r").innerHTML=rs.map(r=>`<option>${r}</option>`).join("");
+ $("a-u").innerHTML=`<option value="1">${esc(i.unit)}</option>`+(i.ps>1?`<option value="${i.ps}">${esc(i.pn||"pack")} (${i.ps})</option>`:"");
+ $("a-n").value=1;$("a-note").value="";$("dAdj").showModal()}
+$("aSave").onclick=async()=>{const r=$("a-r").value,d=REASONS[r]*(+$("a-n").value||0)*(+$("a-u").value);if(!d)return;
+ if(await ok(sb.rpc("adjust_stock",{p_id:adjId,p_delta:d,p_reason:r,p_note:$("a-note").value.trim()}))){$("dAdj").close();refresh()}};
+document.addEventListener("click",async e=>{const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id;
+ if(a==="close")b.closest("dialog").close();else if(a==="csv")exportCsv(b.dataset.k);
+ else if(a==="add")openProd(0);else if(a==="edit")openProd(id);else if(a==="adj")openAdj(id);
+ else if(a==="out"){await sb.auth.signOut();S={user:"",role:"",uid:"",items:[],hist:[],staff:[]};location.hash="";document.body.classList.add("out")}
+ else if(a==="del"){if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Tap again to confirm";b.style.color="var(--r)";
+  setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="Delete";b.style.color=""}},3000);return}
+  if(await ok(sb.from("products").delete().eq("id",id)))refresh()}
+ else if(a==="applycount"){let n=0;for(const el of document.querySelectorAll("[data-cid]")){if(el.value==="")continue;const i=findI(el.dataset.cid),c=+el.value;
+  if(c!==i.qty){if(!await ok(sb.rpc("adjust_stock",{p_id:i.id,p_delta:c-i.qty,p_reason:"Stock count correction",p_note:""})))break;n++}}
+  await loadAll();toast(n+" difference"+(n==1?"":"s")+" saved");location.hash="history";route()}});
+document.addEventListener("input",e=>{const t=e.target;if(t.id==="per"){F.p=+t.value;route()}
+ if(t.id==="q"||t.id==="c"||t.id==="f"){F[t.id]=t.value;$("rows").innerHTML=prodRows()}
+ if(t.dataset.cid){const i=findI(t.dataset.cid),d=$("d"+i.id);if(t.value===""){d.textContent="–";return}const x=+t.value-i.qty;d.textContent=x===0?"Matches":(x>0?"+":"")+x;d.className=x===0?"in":"outq"}});
+document.addEventListener("change",async e=>{const t=e.target;
+ if(t.dataset.sid){if(await ok(sb.from("profiles").update({role:t.value}).eq("id",t.dataset.sid)))toast("Role updated")}
+ if(t.dataset.aid){if(await ok(sb.from("profiles").update({active:t.checked}).eq("id",t.dataset.aid)))toast(t.checked?"Account on":"Account off")}
+ if(t.dataset.nid){if(await ok(sb.from("profiles").update({name:t.value.trim()||"Staff"}).eq("id",t.dataset.nid)))toast("Name saved")}});
+async function start(){const{data:{session}}=await sb.auth.getSession();if(!session){document.body.classList.add("out");return}
+ const r=await sb.from("profiles").select("*").eq("id",session.user.id).single();
+ if(r.error||!r.data||!r.data.active){await sb.auth.signOut();document.body.classList.add("out");$("lerr").textContent="This account is not active. Ask the admin.";return}
+ S.uid=r.data.id;S.user=r.data.name;S.role=r.data.role;document.body.classList.remove("out");applyNav();brand();await loadAll();route()}
+$("lgo").onclick=async()=>{$("lerr").textContent="";const{error}=await sb.auth.signInWithPassword({email:$("le").value.trim(),password:$("lp").value});if(error){$("lerr").textContent=error.message;return}$("lp").value="";start()};
+$("lp").addEventListener("keydown",e=>{if(e.key==="Enter")$("lgo").click()});
+start();
+</script></body></html>
